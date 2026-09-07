@@ -1,0 +1,10 @@
+{
+  "bindings": [
+    {
+      "role": "roles/owner",
+      "members": [
+        "serviceAccount:cloudnotes-app@cloudnotes-placeholder-project.iam.gserviceaccount.com"
+      ]
+    }
+  ]
+}

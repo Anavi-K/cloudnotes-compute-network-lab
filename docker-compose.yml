@@ -1,0 +1,42 @@
+# Local stand-in for two Compute Engine VMs (app, db) sitting inside a VPC
+# made of two subnets, represented here by two custom Docker networks:
+#   vpc-frontend -> public-facing subnet (serves HTTP traffic)
+#   vpc-backend  -> private subnet (database traffic only, no public exposure)
+#
+# Docker Compose's built-in service-name DNS (e.g. resolving "db" from "app")
+# stands in for Cloud DNS resolving instance/service names inside a VPC.
+
+services:
+  app:
+    image: nginx:alpine
+    container_name: cloudnotes-app
+    ports:
+      - "8080:80"
+    networks:
+      - vpc-frontend
+    # NOTE: app must be able to reach db (and vice versa) over the backend
+    # subnet, and resolve it by service name "db", per the design in README.md.
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    container_name: cloudnotes-db
+    environment:
+      POSTGRES_USER: cloudnotes
+      POSTGRES_PASSWORD: localdevonly
+      POSTGRES_DB: cloudnotes
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - vpc-backend
+    # DB VM lives only on the private subnet -- never attached to vpc-frontend.
+
+networks:
+  vpc-frontend:
+    driver: bridge
+  vpc-backend:
+    driver: bridge
+
+volumes:
+  db-data:
