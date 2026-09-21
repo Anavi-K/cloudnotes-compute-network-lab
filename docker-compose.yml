@@ -13,7 +13,7 @@ services:
     ports:
       - "8080:80"
     networks:
-      - vpc-frontend
+      - vpc-backend
     # NOTE: app must be able to reach db (and vice versa) over the backend
     # subnet, and resolve it by service name "db", per the design in README.md.
     depends_on:
